@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>读书农场</title>
+<style>
+:root{--bg:#F3EBD3;--card:#FFF9E6;--ink:#3B2A1A;--sub:#7A6A55;--green:#5FAE5B;--soil:#8B5A2B;--or:#F2A93B;--sky:#D9EDF2}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif}
+#app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px calc(env(safe-area-inset-bottom,0px) + 30px)}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.head h1{font-size:24px;letter-spacing:.06em}
+.link{font:inherit;font-size:14px;color:var(--ink);background:none;border:0;min-height:40px;padding:0 4px;cursor:pointer;text-decoration:underline}
+.box{background:var(--card);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);margin-bottom:22px}
+.sky{position:relative;background:var(--sky);padding:30px 8px 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:end;border-bottom:3px solid var(--ink)}
+.sky:before{content:"";position:absolute;top:12px;right:14px;width:20px;height:20px;background:var(--or);box-shadow:0 0 0 4px #F7D58A}
+.soil{position:absolute;left:0;right:0;bottom:0;height:22px;background:var(--soil);border-top:3px solid #5E3A18;background-image:repeating-linear-gradient(90deg,transparent 0 12px,#7A4D23 12px 16px)}
+.slot{position:relative;z-index:1;min-height:110px;display:flex;align-items:flex-end;justify-content:center;cursor:pointer}
+.slot svg{width:100%;max-width:150px;height:auto;shape-rendering:crispEdges;transform-origin:50% 100%}
+.slot svg.pop{animation:pop .6s steps(6)}
+@keyframes pop{0%{transform:scale(.9)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+.hole{position:absolute;bottom:-14px;left:50%;width:34px;height:8px;margin-left:-17px;background:#5E3A18}
+.gain{position:absolute;left:50%;top:30%;transform:translateX(-50%);background:var(--or);border:3px solid var(--ink);padding:2px 8px;font-weight:700;font-size:15px;white-space:nowrap;animation:fl 1.4s steps(10) forwards;z-index:3}
+@keyframes fl{0%{opacity:1;top:55%}80%{opacity:1}100%{opacity:0;top:5%}}
+.labs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px}
+.lab{padding:8px 6px;min-height:104px;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:stretch;justify-content:flex-start}
+.lab.sel{background:#FFE7A8;box-shadow:inset 0 0 0 3px var(--ink)}
+.ttl{font-size:14px;font-weight:700;line-height:1.3;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+.stage{align-self:flex-start;background:var(--or);border:2px solid var(--ink);font-size:11px;font-weight:700;padding:0 6px}
+.bar{position:relative;height:18px;border:3px solid var(--ink);background:#EADFC0;overflow:hidden}
+.fill{height:100%;background:var(--green);width:var(--to)}
+.fill.an{animation:fi .8s steps(8) forwards}
+@keyframes fi{from{width:var(--from)}to{width:var(--to)}}
+.bar:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(5% - 2px),rgba(59,42,26,.4) calc(5% - 2px) 5%);pointer-events:none}
+.pc{font-size:13px;font-weight:700;text-align:right}
+.wp{padding:14px;border-top:3px solid var(--ink)}
+.wt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.wt b{font-size:17px;word-break:break-all}.wt span{font-size:14px;font-weight:700;white-space:nowrap}
+.meta{font-size:13px;color:var(--sub);margin-top:10px}
+.wr{display:flex;gap:8px;align-items:flex-end}.wr>div{flex:1}
+.wr label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px}
+.hint{padding:16px 14px;font-size:14px;color:var(--sub);border-top:3px solid var(--ink);text-align:center}
+input{font:inherit;font-size:16px;color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:0;padding:8px 10px;min-height:46px;width:100%;outline:none}
+input:focus{background:#FFFBE8}
+.btn{font:inherit;font-size:16px;font-weight:700;min-height:46px;padding:0 18px;background:var(--green);color:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;white-space:nowrap}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.full{width:100%}.btn.or{background:var(--or);color:var(--ink)}.btn.sm{min-height:40px;font-size:14px;padding:0 6px;width:100%}
+.btn.gh{background:var(--card);color:var(--ink)}.btn.dg{background:var(--card);color:#B3261E}
+.fh{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;border-bottom:3px solid var(--ink)}
+.fh b{font-size:18px}.fh span{font-size:14px;color:var(--sub)}
+.fruits{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;padding:14px;background:repeating-linear-gradient(0deg,#C9A878 0 4px,#BF9C6C 4px 8px)}
+.fruits button{background:rgba(255,249,230,.92);border:3px solid var(--ink);padding:8px 4px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font:inherit;color:var(--ink)}
+.fruits .fn{font-size:12px;font-weight:700;line-height:1.3;text-align:center;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+.fruits svg{width:48px;height:48px;shape-rendering:crispEdges;display:block}
+.note{font-size:14px;color:var(--sub);text-align:center;padding:26px 14px}
+#modal{position:fixed;inset:0;background:rgba(59,42,26,.5);display:none;align-items:flex-end;justify-content:center;z-index:9}
+#modal.on{display:flex}
+#sheet{background:var(--bg);width:100%;max-width:520px;max-height:92%;overflow-y:auto;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 20px);border:3px solid var(--ink);border-bottom:0}
+#sheet h2{font-size:19px;margin-bottom:8px;word-break:break-all}
+.fr{padding:9px 0}.fr label{display:block;font-size:13px;color:var(--sub);margin-bottom:5px}
+.rw{display:flex;justify-content:space-between;padding:9px 0;border-bottom:2px solid #DCCFAE;font-size:15px}
+#sheet .btn{display:block;width:100%;margin-top:12px}
+.big{width:96px;height:96px;margin:0 auto 10px}.big svg{width:100%;height:100%;shape-rendering:crispEdges}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="head"><h1>读书农场</h1><button class="link" id="bk">备份</button></div>
+  <div id="main"></div>
+</div>
+<div id="modal"><div id="sheet"></div></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let D={plots:[null,null,null],orch:[]},sel=-1,fx=null;
+try{const d=JSON.parse(localStorage.getItem('farm_data')||'null');if(d){D.plots=(d.plots||[]).concat([null,null,null]).slice(0,3);D.orch=d.orch||[]}}catch(e){}
+const save=()=>{try{localStorage.setItem('farm_data',JSON.stringify(D))}catch(e){}};
+const p2=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
+const days=(a,b)=>Math.max(1,Math.round((new Date(b)-new Date(a))/864e5)+1);
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1700)};
+const steps=b=>b.total>0?Math.min(20,Math.floor(b.page/b.total*20)):0;
+const stage=s=>s===0?'种子':s<5?'嫩芽':s<9?'幼苗':s<14?'小树':s<20?'大树':'成熟';
+
+// 像素树
+function tree(s,done,cls){
+  let r='';const R=(x,y,w,h,c)=>{r+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`};
+  if(s<=0){R(11,19,3,2,'#6B4423');R(12,18,1,1,'#6B4423')}
+  else if(s<5){const top=21-s;R(12,top,1,s,'#4E9A4A');
+    if(s>=2){R(10,top,2,1,'#6FBF63');R(13,top,2,1,'#6FBF63');R(11,top+1,1,1,'#6FBF63');R(13,top+1,1,1,'#6FBF63')}else R(11,top-1,3,1,'#6FBF63')}
+  else{
+    const rc=Math.min(Math.floor((s-3)/2),8),top=21-s,cy=top+rc,tw=s<9?1:3;
+    R(12-(tw-1)/2,cy,tw,21-cy,'#7A4D23');
+    for(let dy=-rc;dy<=rc;dy++){const hw=Math.min(12,Math.round(Math.sqrt(rc*rc+rc*.6-dy*dy)));R(12-hw,cy+dy,2*hw+1,1,'#5FAE5B');
+      if(rc>=2)for(let x=12-hw;x<=12+hw;x++){const h=(x*7+(cy+dy)*13+x*(cy+dy))%11;if(h===0)R(x,cy+dy,1,1,'#4A9448');else if(h===5)R(x,cy+dy,1,1,'#7CC871')}}
+    if(done)[[-.5,-.3],[.45,.1],[-.2,.5],[.1,-.6],[.6,-.4]].forEach(([ax,ay])=>{const x=12+Math.round(ax*rc),y=cy+Math.round(ay*rc);R(x,y,2,2,'#E8553D');R(x,y,1,1,'#F59A8A')});
+  }
+  return `<svg viewBox="0 0 25 21" class="${cls||''}">${r}</svg>`;
+}
+
+// 像素水果
+const FR={apple:{n:'苹果',pal:{r:'#E04B3A',h:'#F59A8A',k:'#6B4423',g:'#5FAE5B'},rows:['......k.gg..','.....k.ggg..','..rrrrkrrr..','.rrrrrrrrrr.','.rhhrrrrrrr.','.rhrrrrrrrr.','.rrrrrrrrrr.','.rrrrrrrrrr.','..rrrrrrrr..','..rrrrrrrr..','...rrr.rrr..','............']},
+orange:{n:'橙子',pal:{o:'#F29A2E',h:'#F9C77A',k:'#6B4423',g:'#5FAE5B'},rows:['......kg....','.....kggg...','...oooooo...','..oooooooo..','.ohoooooooo.','.oooooooooo.','.oooooooooo.','.oooooooooo.','..oooooooo..','...oooooo...','............','............']},
+pear:{n:'梨',pal:{y:'#BFCB3C',h:'#E3EC8B',k:'#6B4423',g:'#5FAE5B'},rows:['.....k......','....kgg.....','....yyyy....','....yhyy....','....yyyy....','...yyyyyy...','..yyyyyyyy..','.yyyyyyyyyy.','.yyyyyyyyyy.','.yyyyyyyyyy.','..yyyyyyyy..','...yyyyyy...']},
+peach:{n:'桃子',pal:{p:'#F5A58A',h:'#FBD0C2',k:'#6B4423',g:'#5FAE5B'},rows:['......k.gg..','.....k.ggg..','..pppkpppp..','.pppppppppp.','.phpppppppp.','.pppppppppp.','.pppppppppp.','.pppppppppp.','..pppppppp..','..pppppppp..','...pppppp...','............']}};
+const FK=Object.keys(FR);
+function fruit(t){const f=FR[t]||FR.apple;let r='';
+  f.rows.forEach((row,y)=>{let x=0;while(x<12){const c=row[x];if(c==='.'){x++;continue}let e=x;while(e<12&&row[e]===c)e++;r+=`<rect x="${x}" y="${y}" width="${e-x}" height="1" fill="${f.pal[c]}"/>`;x=e}});
+  return `<svg viewBox="0 0 12 12">${r}</svg>`}
+const fruitOf=o=>FR[o.fruit]?o.fruit:FK[o.id%4];
+
+function farmHTML(){
+  let slots='',labs='';
+  for(let i=0;i<3;i++){const b=D.plots[i];
+    if(!b){slots+='<div class="slot"><div class="hole"></div></div>';labs+=`<div class="lab"><button class="btn sm or" data-a="add" data-i="${i}">＋ 种一本书</button></div>`;continue}
+    const s=steps(b),done=b.page>=b.total,pct=done?100:Math.floor(b.page/b.total*100);
+    const f=fx&&fx.i===i?fx:null,from=f?Math.floor(f.old/b.total*100):pct;
+    slots+=`<div class="slot" data-a="sel" data-i="${i}">${tree(s,done,f&&f.gain>0?'pop':'')}${f&&f.gain>0?`<div class="gain">+${f.gain} 格</div>`:''}</div>`;
+    labs+=`<div class="lab${sel===i?' sel':''}" data-a="sel" data-i="${i}"><div class="ttl">${esc(b.title)}</div><span class="stage">${stage(s)}</span><div class="bar"><div class="fill${f?' an':''}" style="--from:${from}%;--to:${pct}%"></div></div><div class="pc">${pct}%</div></div>`}
+  let panel='<div class="hint">点上面的空坑，种下第一本书。</div>';
+  const b=D.plots[sel];
+  if(b){const done=b.page>=b.total;
+    panel=`<div class="wp"><div class="wt"><b>${esc(b.title)}</b><span>${b.page} / ${b.total} 页</span></div>
+    ${done?`<button class="btn full or" data-a="harvest" data-i="${sel}">收获这棵树</button>`:`<div class="wr"><div><label>现在读到第几页</label><input id="wi" type="number" inputmode="numeric" min="0"></div><button class="btn" data-a="water" data-i="${sel}">浇水</button></div>`}
+    <div class="meta">${esc(b.start)} 开始 · 已种 ${days(b.start,today())} 天 · <button class="link" style="min-height:24px;font-size:13px" data-a="edit" data-i="${sel}">编辑</button></div></div>`}
+  else if(D.plots.some(x=>x))panel='<div class="hint">点一棵树，给它浇水。</div>';
+  return `<div class="box"><div class="sky"><div class="soil"></div>${slots}</div><div class="labs">${labs}</div>${panel}</div>`;
+}
+function fruitsHTML(){
+  return `<div class="box"><div class="fh"><b>果实</b><span>已收获 ${D.orch.length} 个</span></div>${D.orch.length?`<div class="fruits">${[...D.orch].reverse().map(o=>`<button data-a="fruit" data-id="${o.id}" >${fruit(fruitOf(o))}<span class="fn">${esc(o.title)}</span></button>`).join('')}</div>`:'<div class="note">还没有果实。读完一本书，收获那棵树，这里就会长出一个。</div>'}</div>`;
+}
+function render(){
+  if(!D.plots[sel])sel=D.plots.findIndex(x=>x);
+  $('#main').innerHTML=farmHTML()+fruitsHTML();fx=null;
+}
+
+// 弹窗
+const openM=h=>{$('#sheet').innerHTML=h;$('#modal').classList.add('on')};
+const closeM=()=>$('#modal').classList.remove('on');
+$('#modal').onclick=e=>{if(e.target.id==='modal')closeM()};
+function bookForm(b,mode){
+  const isNew=!!mode.isNew;
+  openM(`<h2>${isNew?'种一本书':'编辑这本书'}</h2>
+  <div class="fr"><label>书籍</label><input id="ft" type="text" maxlength="30"></div>
+  <div class="fr"><label>总页码</label><input id="fp" type="number" inputmode="numeric" min="1"></div>
+  <div class="fr"><label>当前进度（页）</label><input id="fc" type="number" inputmode="numeric" min="0"></div>
+  <div class="fr"><label>开始时间</label><input id="fd" type="date"></div>
+  <button class="btn" id="fs">${isNew?'种下去':'保存修改'}</button><button class="btn gh" id="fx">取消</button>${isNew?'':'<button class="btn dg" id="fdel">拔掉这棵树</button>'}`);
+  $('#ft').value=b?b.title:'';$('#fp').value=b?b.total:'';$('#fc').value=b?b.page:0;$('#fd').value=b?b.start:today();
+  $('#fx').onclick=closeM;
+  $('#fs').onclick=()=>{
+    const title=$('#ft').value.trim(),total=parseInt($('#fp').value),page=parseInt($('#fc').value),start=$('#fd').value;
+    if(!title){toast('请填写书名');return}
+    if(!(total>=1)){toast('请填写总页码');return}
+    if(isNaN(page)||page<0){toast('请填写当前进度');return}
+    if(!start){toast('请选择开始时间');return}
+    const o={title,total,page:Math.min(page,total),start};
+    if(isNew){D.plots[mode.i]=Object.assign({id:Date.now()},o);sel=mode.i}else Object.assign(D.plots[mode.i],o);
+    save();closeM();render();toast(isNew?'种下去了 🌱':'已修改 ✓');
+  };
+  if(!isNew){let armed=false;const d=$('#fdel');d.onclick=()=>{if(!armed){armed=true;d.textContent='再点一次确认拔掉';return}D.plots[mode.i]=null;save();closeM();render();toast('已拔掉')}}
+}
+function orchDetail(id){
+  const o=D.orch.find(x=>x.id===id);if(!o)return;
+  openM(`<div class="big">${fruit(fruitOf(o))}</div><h2 style="text-align:center">${esc(o.title)}</h2><div class="rw"><span>总页数</span><b>${o.total}</b></div><div class="rw"><span>开始日期</span><b>${esc(o.start)}</b></div><div class="rw"><span>读完日期</span><b>${esc(o.end)}</b></div><div class="rw"><span>用时</span><b>${days(o.start,o.end)} 天</b></div>
+  <button class="btn gh" id="oc">关闭</button><button class="btn dg" id="od">删除这个果实</button>`);
+  $('#oc').onclick=closeM;let armed=false;const d=$('#od');
+  d.onclick=()=>{if(!armed){armed=true;d.textContent='再点一次确认删除';return}D.orch=D.orch.filter(x=>x.id!==id);save();closeM();render();toast('已删除')};
+}
+
+// 点击
+$('#main').onclick=e=>{
+  const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,i=Number(t.dataset.i);
+  if(a==='sel'){sel=i;render()}
+  if(a==='add')bookForm(null,{i,isNew:true});
+  if(a==='edit')bookForm(D.plots[i],{i});
+  if(a==='water')water(i);
+  if(a==='harvest'){const b=D.plots[i];D.orch.push({id:Date.now(),title:b.title,total:b.total,start:b.start,end:today(),fruit:FK[Math.floor(Math.random()*FK.length)]});D.plots[i]=null;save();render();toast('收获成功，长出一个果实 🍎')}
+  if(a==='fruit')orchDetail(Number(t.dataset.id));
+};
+function water(i){
+  const b=D.plots[i],v=parseInt($('#wi').value);
+  if(isNaN(v)||v<0){toast('请输入现在读到第几页');return}
+  const np=Math.min(v,b.total),old=b.page;
+  if(np===old){toast('进度没有变化');return}
+  const g=steps({total:b.total,page:np})-steps(b);
+  b.page=np;save();fx={i,old,gain:g};render();
+  if(np<old)toast('进度已回退');else if(np>=b.total)toast('读完啦！点“收获”吧 🎉');else toast(g>0?`浇水成功，长高了 ${g} 格`:'浇水成功');
+}
+$('#main').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='wi')water(sel)});
+
+// 备份
+const q=v=>{v=String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+$('#bk').onclick=()=>{
+  let lb='';try{lb=localStorage.getItem('farm_bk')||''}catch(e){}
+  openM(`<h2>备份</h2><div class="rw" style="border:0;font-size:13px;color:var(--sub)">${lb?'上次备份：'+esc(lb):'还没备份过。数据只存在本机，换手机或清除缓存会丢失，建议定期导出。'}</div>
+  <button class="btn" id="ex">导出 CSV 备份</button><button class="btn gh" id="im">导入 CSV 备份</button><button class="btn gh" id="bc">关闭</button><input type="file" id="file" accept=".csv,.txt" style="display:none">`);
+  $('#bc').onclick=closeM;$('#ex').onclick=exportCSV;$('#im').onclick=()=>{$('#file').value='';$('#file').click()};$('#file').onchange=importCSV;
+};
+function exportCSV(){
+  const rows=[['状态','书名','总页数','当前页','开始日期','读完日期','果实']];
+  D.plots.forEach(b=>b&&rows.push(['在读',b.title,b.total,b.page,b.start,'','']));
+  D.orch.forEach(o=>rows.push(['已收获',o.title,o.total,o.total,o.start,o.end,FR[fruitOf(o)].n]));
+  if(rows.length<2){toast('还没有数据可导出');return}
+  const blob=new Blob(['\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='读书农场_'+today()+'.csv';document.body.appendChild(a);a.click();a.remove();
+  try{localStorage.setItem('farm_bk',new Date().toLocaleString('zh-CN'))}catch(e){}
+  toast('已导出');
+}
+function parseCSV(t){const rows=[];let r=[],c='',iq=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(iq){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else iq=false}else c+=ch}
+    else if(ch==='"')iq=true;else if(ch===','){r.push(c);c=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';rows.push(r);r=[]}else c+=ch}
+  if(c!==''||r.length){r.push(c);rows.push(r)}return rows.filter(x=>x.some(v=>v!==''))}
+function importCSV(e){
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{
+    const rows=parseCSV(String(rd.result).replace(/^\ufeff/,''));
+    if(rows.length<2||!rows[0].includes('书名')){toast('文件格式不对');return}
+    const H=rows[0],ix=k=>H.indexOf(k);let n=0,skip=0,id=Date.now();
+    rows.slice(1).forEach(x=>{
+      const st=x[ix('状态')],title=(x[ix('书名')]||'').trim(),total=parseInt(x[ix('总页数')]),page=parseInt(x[ix('当前页')]),start=(x[ix('开始日期')]||'').trim(),end=(x[ix('读完日期')]||'').trim();
+      if(!title||!(total>=1)||!/^\d{4}-\d{2}-\d{2}$/.test(start))return;
+      if(st==='已收获'){const fk=FK.find(k=>FR[k].n===(x[ix('果实')]||'').trim())||FK[Math.floor(Math.random()*4)];D.orch.push({id:id++,title,total,start,end:/^\d{4}-\d{2}-\d{2}$/.test(end)?end:start,fruit:fk});n++}
+      else{const k=D.plots.indexOf(null);if(k<0){skip++;return}D.plots[k]={id:id++,title,total,page:Math.min(Math.max(page||0,0),total),start};n++}
+    });
+    save();closeM();render();toast(n?`已导入 ${n} 条${skip?`，${skip} 本在读的书因坑位已满被跳过`:''}`:'没有可导入的记录');
+  };
+  rd.readAsText(f,'utf-8');
+}
+render();
+</script>
+</body>
+</html>
